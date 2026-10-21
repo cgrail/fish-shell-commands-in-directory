@@ -55,6 +55,7 @@ Set these before the plugin loads (e.g. near the top of `config.fish`):
 | Variable | Default | Meaning |
 |----------|---------|---------|
 | `_dtc_tools` | `npm mvn docker git make gradle yarn pnpm node cargo go kubectl helm terraform python pip brew bun deno` | Only commands whose **command word** is in this list are suggested. Leading `VAR=value` env assignments are skipped first, so `OVERRIDE_APP=x docker compose up` matches `docker`. Set it to the tools you care about. |
+| `_dtc_limit` | `3` | How many suggestions to show. Pickable via `Ctrl`+number up to 9. |
 | `_dtc_db` | `~/.atuin/data/history.db` | Path to atuin's sqlite history database. |
 
 Example — suggest only build tools:

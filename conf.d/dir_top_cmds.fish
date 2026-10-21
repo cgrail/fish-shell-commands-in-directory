@@ -5,6 +5,9 @@ set -g _dtc_sep (printf '\x1f')
 set -q _dtc_tools; or set -g _dtc_tools npm mvn docker git make gradle yarn pnpm \
     node cargo go kubectl helm terraform python python3 pip pip3 brew pnpm bun deno
 
+# How many suggestions to show (and bind to Ctrl+1 .. Ctrl+N, capped at 9).
+set -q _dtc_limit; or set -g _dtc_limit 3
+
 # First real command word, skipping any leading VAR=value env assignments
 # (e.g. `OVERRIDE_APP=x docker compose up` -> docker).
 function _dtc_firsttool
@@ -34,7 +37,7 @@ function _dtc_refresh --on-variable PWD
         set i (math $i + 1)
         set -ga _dtc_cmds $f[2]
         set -a out (set_color brblack)"$i."(set_color normal)" $f[2] "(set_color -o blue)"($f[1]x)"(set_color normal)
-        test $i -ge 3; and break
+        test $i -ge $_dtc_limit; and break
     end
     test -n "$out"; or return
     printf '%s   ' $out
