@@ -24,7 +24,23 @@ query plus a key binding. No daemon, no extra history file.
 
 ## Install
 
+### One-shot script (installs & configures everything)
+
+Installs atuin if missing, wires `atuin init fish` into your `config.fish`, and
+copies the plugin into place. Safe to re-run.
+
+```fish
+git clone https://github.com/<your-github-user>/fish-shell-commands-in-directory
+cd fish-shell-commands-in-directory
+./install.fish
+```
+
+Then open a new fish shell. To backfill suggestions from your existing shell
+history: `atuin import auto`.
+
 ### With [Fisher](https://github.com/jorgebucaran/fisher)
+
+Assumes you already have atuin set up (`atuin init fish` in `config.fish`).
 
 ```fish
 fisher install <your-github-user>/fish-shell-commands-in-directory
