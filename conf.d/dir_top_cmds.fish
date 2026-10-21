@@ -34,7 +34,7 @@ function _dtc_refresh --on-variable PWD
         set i (math $i + 1)
         set -ga _dtc_cmds $f[2]
         set -a out (set_color brblack)"$i."(set_color normal)" $f[2] "(set_color -o blue)"($f[1]x)"(set_color normal)
-        test $i -ge 9; and break
+        test $i -ge 3; and break
     end
     test -n "$out"; or return
     printf '%s   ' $out
