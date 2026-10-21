@@ -1,9 +1,20 @@
 set -q _dtc_db; or set -g _dtc_db "$HOME/.atuin/data/history.db"
 set -g _dtc_sep (printf '\x1f')
 
-# Only suggest commands whose first word is one of these tools. Edit freely.
+# Only suggest commands whose command word is one of these tools. Edit freely.
 set -q _dtc_tools; or set -g _dtc_tools npm mvn docker git make gradle yarn pnpm \
     node cargo go kubectl helm terraform python python3 pip pip3 brew pnpm bun deno
+
+# First real command word, skipping any leading VAR=value env assignments
+# (e.g. `OVERRIDE_APP=x docker compose up` -> docker).
+function _dtc_firsttool
+    for w in (string split ' ' -- $argv[1])
+        test -n "$w"; or continue
+        string match -qr '^[A-Za-z_][A-Za-z0-9_]*=' -- $w; and continue
+        echo $w
+        return
+    end
+end
 
 # Recompute + print the top tool-commands for this directory whenever PWD changes.
 # ponytail: queries sqlite on every cd; indexed on cwd so it's sub-ms, no cache.
@@ -19,7 +30,7 @@ function _dtc_refresh --on-variable PWD
     for row in $rows
         # ponytail: a command containing the 0x1f byte would mis-split; nobody types it.
         set -l f (string split -m1 "$_dtc_sep" -- $row)
-        contains -- (string split -f1 ' ' -- $f[2]) $_dtc_tools; or continue
+        contains -- (_dtc_firsttool $f[2]) $_dtc_tools; or continue
         set i (math $i + 1)
         set -ga _dtc_cmds $f[2]
         set -a out (set_color brblack)"$i."(set_color normal)" $f[2] "(set_color -o blue)"($f[1]x)"(set_color normal)
