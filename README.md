@@ -1,14 +1,15 @@
 # fish-shell-commands-in-directory
 
-A [fish](https://fishshell.com) extension that prints the commands you run most
-often **in the current directory** above the prompt, and lets you re-run one with
-`Ctrl`+a number.
+A [fish](https://fishshell.com) extension that shows the commands you run most
+often **in the current directory**, and lets you re-run one with `Ctrl`+a number.
 
 ```
-1. npm run build (42x)   2. npm test (31x)   3. docker compose up (12x)
-~/code/myapp main
+~/code/myapp
+recent commands: 1. npm run build (42x)   2. npm test (31x)   3. docker compose up (12x)
 >
 ```
+
+![screenshot](docs/screenshot.png)
 
 Press `Ctrl`+`1` to drop `npm run build` onto the prompt, then `Enter`.
 
@@ -72,12 +73,33 @@ Set these before the plugin loads (e.g. near the top of `config.fish`):
 |----------|---------|---------|
 | `_dtc_tools` | `npm mvn docker git make gradle yarn pnpm node cargo go kubectl helm terraform python pip brew bun deno` | Only commands whose **command word** is in this list are suggested. Leading `VAR=value` env assignments are skipped first, so `OVERRIDE_APP=x docker compose up` matches `docker`. Set it to the tools you care about. |
 | `_dtc_limit` | `3` | How many suggestions to show. Pickable via `Ctrl`+number up to 9. |
+| `_dtc_label` | `recent commands:` | Text shown before the suggestions. |
+| `_dtc_inprompt` | `0` | `0` prints the line above the prompt. `1` stays silent so you can place it in your prompt (see below). |
 | `_dtc_db` | `~/.atuin/data/history.db` | Path to atuin's sqlite history database. |
 
 Example — suggest only build tools:
 
 ```fish
 set -g _dtc_tools npm mvn docker make
+```
+
+### Placing it inside your prompt
+
+By default the line prints above the prompt. To put it wherever you like —
+e.g. below the directory — set `_dtc_inprompt` to `1` (as a universal variable so
+it applies before the plugin loads) and call `dtc_prompt_line` from your
+`fish_prompt`:
+
+```fish
+set -U _dtc_inprompt 1
+```
+
+```fish
+function fish_prompt
+    echo (prompt_pwd)
+    dtc_prompt_line   # recent-commands suggestions, below the directory
+    echo -n '> '
+end
 ```
 
 ## Ctrl+number and your terminal

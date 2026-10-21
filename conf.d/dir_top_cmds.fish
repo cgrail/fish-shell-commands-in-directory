@@ -8,6 +8,13 @@ set -q _dtc_tools; or set -g _dtc_tools npm mvn docker git make gradle yarn pnpm
 # How many suggestions to show (and bind to Ctrl+1 .. Ctrl+N, capped at 9).
 set -q _dtc_limit; or set -g _dtc_limit 3
 
+# Label shown before the suggestions.
+set -q _dtc_label; or set -g _dtc_label "recent commands:"
+
+# 0 = print the line above the prompt (works out of the box).
+# 1 = stay silent; call `dtc_prompt_line` from your fish_prompt to place it there.
+set -q _dtc_inprompt; or set -g _dtc_inprompt 0
+
 # First real command word, skipping any leading VAR=value env assignments
 # (e.g. `OVERRIDE_APP=x docker compose up` -> docker).
 function _dtc_firsttool
@@ -19,10 +26,12 @@ function _dtc_firsttool
     end
 end
 
-# Recompute + print the top tool-commands for this directory whenever PWD changes.
+# Recompute the top tool-commands for this directory whenever PWD changes, cache
+# the formatted line in $_dtc_display, and (unless in-prompt) print it.
 # ponytail: queries sqlite on every cd; indexed on cwd so it's sub-ms, no cache.
 function _dtc_refresh --on-variable PWD
     set -g _dtc_cmds # global + cleared; a bare `set -a` here would be function-local
+    set -g _dtc_display ""
     status is-interactive; or return
     test -r "$_dtc_db"; or return
     set -l cwd (string replace -a "'" "''" -- $PWD)
@@ -40,8 +49,13 @@ function _dtc_refresh --on-variable PWD
         test $i -ge $_dtc_limit; and break
     end
     test -n "$out"; or return
-    printf '%s   ' $out
-    echo
+    set -g _dtc_display (set_color -o brblack)"$_dtc_label"(set_color normal)" "(string join '   ' $out)
+    test "$_dtc_inprompt" = 1; or echo $_dtc_display
+end
+
+# Print the cached suggestion line; drop this into your fish_prompt.
+function dtc_prompt_line
+    test -n "$_dtc_display"; and echo $_dtc_display
 end
 
 # Ctrl+1 .. Ctrl+9 -> load that suggestion into the prompt (press Enter to run).
